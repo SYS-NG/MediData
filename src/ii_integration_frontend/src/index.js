@@ -126,7 +126,6 @@ makeProfileButton.onclick = async (e) => {
 
     return false;
 };
-
 const getProfileButton = document.getElementById("getProfile");
 getProfileButton.onclick = async (e) => {
     e.preventDefault();
