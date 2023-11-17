@@ -36,3 +36,126 @@ loginButton.onclick = async (e) => {
     });
     return false;
 };
+const makeProfileButton = document.getElementById("createProfile");
+makeProfileButton.onclick = async (e) => {
+    e.preventDefault();
+
+    const name = document.getElementById("name").value;
+    const h_id = document.getElementById("h_id").value;
+    const weight = parseInt(document.getElementById("weight").value,10);
+    const height = parseInt(document.getElementById("height").value,10);
+    const sex = document.getElementById("sex").value;
+    const gender = document.getElementById("gender").value;
+    const age = parseInt(document.getElementById("age").value, 10);
+    const history = document.getElementById("history").value;
+
+    
+    const profile = {
+        name,
+        h_id,
+        weight,
+        height,
+        sex,
+        gender,
+        age,
+        history
+    };
+
+    try {
+        await actor.create_profile(profile);
+
+        console.log("profile was made");
+    } catch (error) {
+        console.error("error creating profile:", error);
+    }
+
+    return false;
+};
+const getProfileButton = document.getElementById("getProfile");
+getProfileButton.onclick = async (e) => {
+    e.preventDefault();
+    getProfileButton.setAttribute("disabled", true);
+
+    try {
+        const principal = await actor.whoami();
+        const profile = await actor.read_profile(principal);
+        
+        if (profile !== null) {
+            document.getElementById("profileInfoDiv").innerText = JSON.stringify(profile, null, 2);
+        } else {
+            document.getElementById("profileInfoDiv").innerText = "Profile not found.";
+        }
+    } catch (error) {
+        console.error("Error fetching profile:", error);
+        document.getElementById("profileInfoDiv").innerText= "Error fetching profile.";
+    } finally {
+        getProfileButton.removeAttribute("disabled");
+    }
+    return false;
+};
+
+
+/// add new patient button
+const addPatientButton = document.getElementById("addPatient");
+addPatientButton.onclick = async (e) => {
+    e.preventDefault();
+    addPatientButton.setAttribute("disabled", true);
+
+    try {
+        const p_key = await actor.addNewPatient();
+        
+        console.log("Generated key: "+p_key);
+    } catch (error) {
+        console.error("Error fetching key:", error);
+    } finally {
+        addPatientButton.removeAttribute("disabled");
+    }
+    return false;
+};
+
+const getPatientListButton = document.getElementById("getPatientList");
+getPatientListButton.onclick = async (e) => {
+    e.preventDefault();
+    getPatientListButton.setAttribute("disabled", true);
+
+    try {
+        const principal = await actor.whoami();
+        const patientList = await actor.check_doc_patientList(principal);
+        console.log(patientList);
+        patientList.forEach((key, value) => {
+            console.log(`Patient: ${value}`);
+            //// retrieve name and output as a lisit
+          });
+
+    } catch (error) {
+        console.error("Error fetching patient list:", error);
+        document.getElementById("profileInfoDiv").innerText= "Error fetching profile.";
+    } finally {
+        getPatientListButton.removeAttribute("disabled");
+    }
+    return false;
+};
+
+
+
+///// Page switch functions
+const switchPageButton = document.getElementById("switch2");
+switchPageButton.onclick = async (e) => {
+    e.preventDefault();
+    document.getElementById('page1').style.display = 'none';
+    document.getElementById('page2').style.display = 'block';
+    console.log("pages should be switched");    
+    
+    return false;
+};
+
+const switchPageButton1 = document.getElementById("switch1");
+switchPageButton1.onclick = async (e) => {
+    e.preventDefault();
+
+    document.getElementById('page1').style.display = 'block';
+    document.getElementById('page2').style.display = 'none';  
+ 
+    
+    return false;
+};
