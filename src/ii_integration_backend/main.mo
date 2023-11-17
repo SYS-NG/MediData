@@ -111,7 +111,7 @@ actor {
           name = newName;
           doc_num = newDocNum;
           title = newTitle;
-        }
+        };
 
         docToDocData.put(caller, updatedDocInfo);
       };
