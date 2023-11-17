@@ -357,6 +357,18 @@ actor {
   };
   
   //* Read: Optional Type needed 
+  public query func check_patName(patPrincipal: Principal) : async Text{
+    var PatRecord : ?patData = patToRecord.get(patPrincipal);
+    switch (PatRecord) {
+      case null {};
+      case (?PatRecord) {
+        return PatRecord.name;
+      };
+    };
+    return "";
+  };
+
+  //* Read: Optional Type needed 
   public query func check_patAccessLog(patPrincipal: Principal) : async ?accessLog{
     return(patAccessLog.get(patPrincipal));
   };
