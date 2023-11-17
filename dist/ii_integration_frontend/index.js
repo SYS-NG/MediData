@@ -19359,6 +19359,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   init: () => (/* binding */ init)
 /* harmony export */ });
 const idlFactory = ({ IDL }) => {
+  const List = IDL.Rec();
   const Time = IDL.Int;
   const Profile = IDL.Record({
     'age' : IDL.Nat,
@@ -19368,10 +19369,26 @@ const idlFactory = ({ IDL }) => {
     'premium_user' : IDL.Bool,
   });
   const Result_1 = IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text });
+  List.fill(IDL.Opt(IDL.Tuple(IDL.Principal, List)));
+  const patList = IDL.Opt(IDL.Tuple(IDL.Principal, List));
   const Result = IDL.Variant({ 'ok' : IDL.Text, 'err' : IDL.Text });
   return IDL.Service({
+    'acceptNewDoc' : IDL.Func([IDL.Nat], [], []),
+    'addNewPatient' : IDL.Func([], [IDL.Opt(IDL.Nat)], []),
     'create_profile' : IDL.Func([Profile], [], []),
     'delete_profile' : IDL.Func([IDL.Principal], [Result_1], []),
+    'genTempKey' : IDL.Func([], [IDL.Opt(IDL.Nat)], []),
+    'read_doctor' : IDL.Func(
+        [IDL.Principal],
+        [IDL.Opt(IDL.Principal)],
+        ['query'],
+      ),
+    'read_key' : IDL.Func([IDL.Nat], [IDL.Opt(IDL.Principal)], ['query']),
+    'read_patientList' : IDL.Func(
+        [IDL.Principal],
+        [IDL.Opt(patList)],
+        ['query'],
+      ),
     'read_profile' : IDL.Func([IDL.Principal], [IDL.Opt(Profile)], ['query']),
     'update_profile' : IDL.Func([Profile], [Result], []),
     'whoami' : IDL.Func([], [IDL.Principal], []),
