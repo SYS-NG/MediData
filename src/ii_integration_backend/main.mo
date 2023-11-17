@@ -277,6 +277,59 @@ actor {
     return #err("Record modified"); 
   };
 
+  //* Logged Docotor reading Patient Data 
+  public shared({caller}) func logged_pat_check_patRecord(patPrincipal: Principal) : async ?patData{
+
+    var accessLogMsg : Text = "";
+    var success      : Bool = false;
+    var doctorInfo : ?docData = docToDocData.get(caller);
+
+    switch(doctorInfo) {
+      case null { accessLogMsg := "Read Access Denied: No Doctor Info" };
+      case (?doctorInfo) {
+        var doctor_name = doctorInfo.name;
+        if (doctor_name != "") {
+          var doc_s_Patients : ?patList = docToPatList.get(caller);
+          switch (doc_s_Patients) {
+            case null {
+              accessLogMsg := "Read Access Denied: Patient not under doctor";
+            };
+            case (?doc_s_Patients) {
+              let result : ?Principal = List.find<Principal>(doc_s_Patients, func p {p == patPrincipal});
+              switch (result) {
+                case null {
+                  accessLogMsg := "Read Access Denied: Patient not under doctor";
+                };
+                case (?Principal) {
+                  success := true;
+                  accessLogMsg := "Patient Record Viewed by: Doctor" # doctor_name;
+                };
+              };
+            };
+          };
+        } else {
+          accessLogMsg := "Read Access Denied: No Doctor Name";
+        };
+      };
+    };
+    
+    var curLog : ?accessLog       = patAccessLog.get(patPrincipal);
+
+    switch (curLog) {
+      case null {};
+      case (?curLog) {
+        var newLog : accessLog = List.push(accessLogMsg, curLog);
+        patAccessLog.put(patPrincipal, newLog);
+      };
+    };
+
+    if (success) {
+      return(patToRecord.get(patPrincipal));
+    } else {
+      return null;
+    }
+  };
+
 //=============================================================READ/QUERIES========================================
 
   //* Read: Optional Type needed 
@@ -308,55 +361,4 @@ actor {
   public query func check_docData(docPrincipal: Principal) : async ?docData{
     return(docToDocData.get(docPrincipal));
   };
-  //==================================================== OLD CODE ==========================================================================
-  //  //Profile fields
-  //  public type Profile = {
-  //    name : Text; 
-  //    age : Nat; 
-  //    registration_date: Time;
-  //    premium_user : Bool; 
-  //    bio : Text;
-  //  }; 
-  //  
-  //  //*create new profile and store it inside the hashmap : the Key is the principal of the calle and the Value is the Profile submited
-  //  let users        : Hashmap.HashMap<Principal, Profile> = Hashmap.HashMap<Principal, Profile> (0, Principal.equal, Principal.hash);
-  //
-  //
-  //  //* Create:  Caller is the Principal of the caller
-  //  public shared ({caller}) func create_profile(user : Profile) : async () {
-  //    users.put(caller, user); 
-  //    return; 
-  //  }; 
-  //
-  //  //* Read: Optional Type needed 
-  //  public query func read_profile(principal : Principal) : async ?Profile {
-  //    return(users.get(principal));
-  //  };
-  //
-  //
-  //  //*Update: Result type introduced - Swicth/Case. 
-  //  public shared({caller}) func update_profile(user : Profile) : async Result.Result<Text, Text> {
-  //    switch(users.get(caller)) {
-  //      case(null) return #err("There is no user profile for principal :  " # Principal.toText(caller));
-  //      case(?user) {
-  //        users.put(caller, user); 
-  //        return #err("Profile modified for user with principal : " # Principal.toText(caller)); 
-  //      };
-  //    };
-  //  };
-  //
-  //
-  //  //* Delete: 
-  //  public shared ({caller}) func delete_profile(principal : Principal) : async Result.Result<(), Text>{
-  //    assert (caller == principal);
-  //    switch (users.remove(principal)) {
-  //      case(null) {
-  //        return #err("There is no profile for user with principal " # Principal.toText(principal)); 
-  //      }; 
-  //      case(?user) {
-  //        return #ok();
-  //      };
-  //    };
-  //  };
-
 };
