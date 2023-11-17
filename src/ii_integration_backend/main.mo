@@ -23,17 +23,18 @@ actor {
   public type Time = Time.Time;
 
   // Patient
-  public type patHist = List.List<Text>;
-  public type patList = List.List<Principal>;
-  public type patData = {
-    name : Text; 
+  public type accessLog  = List.List<Text>;
+  public type patHist    = List.List<Text>;
+  public type patList    = List.List<Principal>;
+  public type patData    = {
+    name           : Text; 
     healthcare_num : Nat;
-    dob : Text; 
-    weight: Nat;
-    height: Nat;
-    sex: Text;
-    gender: Text;
-    history: patHist;
+    dob            : Text; 
+    weight         : Nat;
+    height         : Nat;
+    sex            : Text;
+    gender         : Text;
+    history        : patHist;
   };
 
   public type docData = {
@@ -45,11 +46,12 @@ actor {
   // Storage
   let eq: (Nat,Nat) ->Bool = func(x, y) { x == y };
   let keyHash: (Nat) -> Hash.Hash = func(x) { Prim.natToNat32 x };
-  let keyToDoc     : Hashmap.HashMap<Nat, Principal> = Hashmap.HashMap<Nat, Principal> (0, eq, keyHash);
-  let docToPatList : Hashmap.HashMap<Principal, patList> = Hashmap.HashMap<Principal, patList> (0, Principal.equal, Principal.hash);
+  let keyToDoc     : Hashmap.HashMap<Nat, Principal>       = Hashmap.HashMap<Nat, Principal> (0, eq, keyHash);
+  let docToPatList : Hashmap.HashMap<Principal, patList>   = Hashmap.HashMap<Principal, patList> (0, Principal.equal, Principal.hash);
   let patToDoc     : Hashmap.HashMap<Principal, Principal> = Hashmap.HashMap<Principal, Principal> (0, Principal.equal, Principal.hash);
-  let patToRecord  : Hashmap.HashMap<Principal, patData> = Hashmap.HashMap<Principal, patData> (0, Principal.equal, Principal.hash);
-  let docToDocData : Hashmap.HashMap<Principal, docData> = Hashmap.HashMap<Principal, docData> (0, Principal.equal, Principal.hash);
+  let patToRecord  : Hashmap.HashMap<Principal, patData>   = Hashmap.HashMap<Principal, patData> (0, Principal.equal, Principal.hash);
+  let docToDocData : Hashmap.HashMap<Principal, docData>   = Hashmap.HashMap<Principal, docData> (0, Principal.equal, Principal.hash);
+  let patAccessLog : Hashmap.HashMap<Principal, accessLog> = Hashmap.HashMap<Principal, accessLog> (0, Principal.equal, Principal.hash);
 
   //* Generate Key
   public shared ({caller}) func genTempKey() : async ?Nat {
@@ -124,7 +126,6 @@ actor {
     return #err("Updated Doctor Information.");
   };
 
-
   //* pat_addNewPatRecord
   public shared ({caller}) func addPatRecord(patPrincipal : Principal) : async() {
     var newRecord : patData = {
@@ -138,6 +139,11 @@ actor {
       history: patHist      = List.nil<Text>();
     };
     patToRecord.put(patPrincipal, newRecord);
+
+    var newLog : accessLog = List.nil<Text>();
+    newLog := List.push("Patient Record Created.", newLog);
+    patAccessLog.put(patPrincipal, newLog);
+
     return;
   };
 
@@ -168,7 +174,10 @@ actor {
     };
 
     // Create Patient Record if does not exist
-    await addPatRecord(caller);
+    if (patAccessLog.get(caller) == null)
+    {
+      await addPatRecord(caller);
+    };
 
     return; 
   }; 
@@ -180,7 +189,7 @@ actor {
       case(null) return #err("There is no patient record for this Patient");
       case(?oldRecord) {
         patToRecord.put(patPrincipal, initRecord); 
-        return #err("Record modified"); 
+        return #err("Record Initialized"); 
       };
     };
   };
@@ -254,6 +263,15 @@ actor {
           history        = newHistory;
         };
         patToRecord.put(patPrincipal, newRecord); 
+
+        var curLog : ?accessLog       = patAccessLog.get(patPrincipal);
+        switch (curLog) {
+          case null {};
+          case (?curLog) {
+            var newLog : accessLog = List.push("Record Modified", curLog);
+            patAccessLog.put(patPrincipal, newLog);
+          };
+        };
       };
     };
     return #err("Record modified"); 
@@ -279,6 +297,11 @@ actor {
   //* Read: Optional Type needed 
   public query func check_patRecord(patPrincipal: Principal) : async ?patData{
     return(patToRecord.get(patPrincipal));
+  };
+  
+  //* Read: Optional Type needed 
+  public query func check_patAccessLog(patPrincipal: Principal) : async ?accessLog{
+    return(patAccessLog.get(patPrincipal));
   };
 
   //* Read: Optional Type needed 
