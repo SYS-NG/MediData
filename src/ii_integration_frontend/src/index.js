@@ -4,6 +4,7 @@ import {
 } from "../../declarations/ii_integration_backend";
 import { AuthClient } from "@dfinity/auth-client";
 import { HttpAgent } from "@dfinity/agent";
+
 let actor = ii_integration_backend;
 console.log(process.env.CANISTER_ID_INTERNET_IDENTITY);
 const whoAmIButton = document.getElementById("whoAmI");
@@ -36,33 +37,55 @@ loginButton.onclick = async (e) => {
     });
     return false;
 };
+
+//add patient record
+
+const addPatientRecordButton = document.getElementById("addPatientData");
+addPatientRecordButton.onclick = async (e) => {
+    e.preventDefault();
+
+    try {
+        const principal = await actor.whoami();
+        await actor.addPatRecord(principal);
+
+        console.log("profile was created");
+    } catch (error) {
+        console.error("error creating profile:", error);
+    }
+
+    return false;
+};
+
+
 const makeProfileButton = document.getElementById("createProfile");
 makeProfileButton.onclick = async (e) => {
     e.preventDefault();
 
     const name = document.getElementById("name").value;
-    const h_id = document.getElementById("h_id").value;
+    const h_id = parseInt(document.getElementById("h_id").value,10);
     const weight = parseInt(document.getElementById("weight").value,10);
     const height = parseInt(document.getElementById("height").value,10);
     const sex = document.getElementById("sex").value;
     const gender = document.getElementById("gender").value;
-    const age = parseInt(document.getElementById("age").value, 10);
+    const age = document.getElementById("age").value;
     const history = document.getElementById("history").value;
 
     
     const profile = {
-        name,
-        h_id,
-        weight,
-        height,
-        sex,
-        gender,
-        age,
-        history
+        name: name,
+        health_care_num: h_id,
+        dob:age,
+        weight:weight,
+        height:height,
+        sex:sex,
+        gender:gender,
+        history:null
     };
 
     try {
-        await actor.create_profile(profile);
+        const principal = await actor.whoami();
+        const patprin = await actor.check_doc_patientList(principal);
+        await actor.init_patient_record(profile);
 
         console.log("profile was made");
     } catch (error) {
@@ -78,7 +101,7 @@ getProfileButton.onclick = async (e) => {
 
     try {
         const principal = await actor.whoami();
-        const profile = await actor.read_profile(principal);
+        const profile = await actor.check_patRecord(principal);
         
         if (profile !== null) {
             document.getElementById("profileInfoDiv").innerText = JSON.stringify(profile, null, 2);
