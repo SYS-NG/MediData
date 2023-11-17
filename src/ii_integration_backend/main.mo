@@ -377,4 +377,5 @@ actor {
   public query func check_docData(docPrincipal: Principal) : async ?docData{
     return(docToDocData.get(docPrincipal));
   };
+  
 };
