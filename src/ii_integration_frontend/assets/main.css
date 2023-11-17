@@ -35,3 +35,41 @@ button[type="submit"] {
 #greeting:empty {
     display: none;
 }
+
+ul.navigation {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #333;
+  }
+  
+  ul.navigation li {
+    float: left;
+  }
+  
+  ul.navigation li a {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+  }
+  
+  ul.navigation li a:hover:not(.active) {
+    background-color: #111;
+  }
+  
+  ul.navigation .active {
+    background-color: #04aa6d;
+  }
+
+  .header {
+    padding: 12px;
+    text-align: center;
+    background: rgb(160, 255, 141);
+  }
+  
+  .header h1 {
+    font-size: 64px;
+  }
