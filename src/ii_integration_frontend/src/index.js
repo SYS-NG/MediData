@@ -56,6 +56,22 @@ addPatientRecordButton.onclick = async (e) => {
     return false;
 };
 
+const acceptNewDocButton = document.getElementById("acceptNewDoc");
+acceptNewDocButton.onclick = async (e) => {
+    e.preventDefault();
+    const tempKey = parseInt(document.getElementById("doctorAcceptanceKey").value, 10);
+
+    try {
+        await actor.acceptNewDoc(tempKey);
+        document.getElementById("acceptDocResp").innerText = "Doctor was accepted";
+        console.log("Doctor was accepted");
+    } catch (error) {
+        console.error("error accepting doctor:", error);
+    }
+
+    return false;
+};
+
 
 const makeProfileButton = document.getElementById("createProfile");
 makeProfileButton.onclick = async (e) => {
@@ -127,6 +143,7 @@ addPatientButton.onclick = async (e) => {
     try {
         const p_key = await actor.addNewPatient();
         
+        document.getElementById("tempKeydisp").innerText = "Gererated key: " + p_key;
         console.log("Generated key: "+p_key);
     } catch (error) {
         console.error("Error fetching key:", error);
