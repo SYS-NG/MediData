@@ -332,6 +332,10 @@ actor {
 
 //=============================================================READ/QUERIES========================================
 
+  public shared({caller}) func doc_check_doc_patientList() : async ?patList {
+    return(docToPatList.get(caller));
+  };
+  
   //* Read: Optional Type needed 
   public query func check_doc_patientList(docPrincipal : Principal) : async ?patList {
     return(docToPatList.get(docPrincipal));
