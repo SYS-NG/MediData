@@ -134,22 +134,6 @@ getProfileButton.onclick = async (e) => {
     const principal = await actor.whoami();
 
     try {
-<<<<<<< HEAD
-        const profile = await actor.check_patRecord(principal);
-        console.log(profile);
-        console.log(profile[0])
-        
-        if (profile !== null) {
-            console.log(profile[0].name);
-            console.log(profile[0].healthcare_num);
-            console.log(profile[0].dob);
-            console.log(profile[0].weight);
-            console.log(profile[0].height);
-            console.log(profile[0].sex);
-            console.log(profile[0].gender);
-            console.log(profile[0].history);
-            //document.getElementById("profileInfoDiv").innerText = JSON.stringify(profile, null, 2);
-=======
         const principal = await actor.whoami();
         const profile   = await actor.check_patRecord(principal);
         
@@ -173,7 +157,6 @@ getProfileButton.onclick = async (e) => {
             document.getElementById("myGender").innerText = patgender;
             // document.getElementById("myHist").innerText   = pathistory;
         
->>>>>>> buttons
         } else {
             document.getElementById("profileInfoDiv").innerText = "Profile not found.";
         }
