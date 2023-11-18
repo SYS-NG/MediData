@@ -3,4 +3,5 @@ node_modules
 */declarations
 package-lock.json
 .dfx/local
-*/dist
+dist/*
+dist
