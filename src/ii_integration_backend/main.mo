@@ -8,6 +8,7 @@ import Hash "mo:base/Hash";
 import Prim "mo:prim";
 import Int "mo:base/Int";
 import Option "mo:base/Option";
+import Buffer "mo:base/Buffer";
 
 
 actor {
@@ -25,7 +26,7 @@ actor {
   // Patient
   public type accessLog  = List.List<Text>;
   public type patHist    = List.List<Text>;
-  public type patList    = List.List<Principal>;
+  public type patBuff    = Buffer.Buffer<Principal>;
   public type patData    = {
     name           : Text; 
     healthcare_num : Nat;
@@ -47,7 +48,7 @@ actor {
   let eq: (Nat,Nat) ->Bool = func(x, y) { x == y };
   let keyHash: (Nat) -> Hash.Hash = func(x) { Prim.natToNat32 x };
   let keyToDoc     : Hashmap.HashMap<Nat, Principal>       = Hashmap.HashMap<Nat, Principal> (0, eq, keyHash);
-  let docToPatList : Hashmap.HashMap<Principal, patList>   = Hashmap.HashMap<Principal, patList> (0, Principal.equal, Principal.hash);
+  let docToPatList : Hashmap.HashMap<Principal, patBuff>   = Hashmap.HashMap<Principal, patBuff> (0, Principal.equal, Principal.hash);
   let patToDoc     : Hashmap.HashMap<Principal, Principal> = Hashmap.HashMap<Principal, Principal> (0, Principal.equal, Principal.hash);
   let patToRecord  : Hashmap.HashMap<Principal, patData>   = Hashmap.HashMap<Principal, patData> (0, Principal.equal, Principal.hash);
   let docToDocData : Hashmap.HashMap<Principal, docData>   = Hashmap.HashMap<Principal, docData> (0, Principal.equal, Principal.hash);
@@ -156,18 +157,16 @@ actor {
     switch (docPrincipal) {
       case (?docPrincipal) {
         patToDoc.put(caller, docPrincipal);
-        var curList : ?patList = docToPatList.get(docPrincipal);
-        var nxtList : patList  = List.nil<Principal>(); 
+        var curBuff : ?patBuff = docToPatList.get(docPrincipal);
+        var nxtBuff : patBuff  = Buffer.Buffer<Principal>(5);
 
-        switch(curList) {
-          case (?curList) {
-            nxtList := curList;
-          };
+        switch(curBuff) {
+          case (?curBuff) {nxtBuff := curBuff};
           case null {};
         };
 
-        nxtList := List.push<Principal>(caller, nxtList);
-        docToPatList.put(docPrincipal, nxtList);
+        nxtBuff.add(caller);
+        docToPatList.put(docPrincipal, nxtBuff);
         keyToDoc.delete(tempKey);
       };
       case null {};
@@ -289,18 +288,18 @@ actor {
       case (?doctorInfo) {
         var doctor_name = doctorInfo.name;
         if (doctor_name != "") {
-          var doc_s_Patients : ?patList = docToPatList.get(caller);
+          var doc_s_Patients : ?patBuff = docToPatList.get(caller);
           switch (doc_s_Patients) {
             case null {
               accessLogMsg := "Read Access Denied: Patient not under doctor";
             };
             case (?doc_s_Patients) {
-              let result : ?Principal = List.find<Principal>(doc_s_Patients, func p {p == patPrincipal});
+              let result : Bool = Buffer.contains<Principal>(doc_s_Patients, patPrincipal, Principal.equal);
               switch (result) {
-                case null {
+                case false {
                   accessLogMsg := "Read Access Denied: Patient not under doctor";
                 };
-                case (?Principal) {
+                case true {
                   success := true;
                   accessLogMsg := "Patient Record Viewed by: Doctor" # doctor_name;
                 };
@@ -332,13 +331,26 @@ actor {
 
 //=============================================================READ/QUERIES========================================
 
-  public shared({caller}) func doc_check_doc_patientList() : async ?patList {
-    return(docToPatList.get(caller));
+  public shared({caller}) func doc_check_doc_patientList() : async [Principal]{
+    var patBuffer : ?patBuff= docToPatList.get(caller);
+    switch (patBuffer) {
+      case null {};
+      case (?patBuffer) {
+        return Buffer.toArray<Principal>(patBuffer);
+      };
+    };
+    return [];
   };
-  
-  //* Read: Optional Type needed 
-  public query func check_doc_patientList(docPrincipal : Principal) : async ?patList {
-    return(docToPatList.get(docPrincipal));
+
+  public query func check_doc_patientList(docPrincipal : Principal) : async [Principal]{
+    var patBuffer : ?patBuff = docToPatList.get(docPrincipal);
+    switch (patBuffer) {
+      case null {};
+      case (?patBuffer) {
+        return Buffer.toArray<Principal>(patBuffer);
+      };
+    };
+    return [];
   };
 
   //* Read: Optional Type needed 
