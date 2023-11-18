@@ -134,7 +134,7 @@ getProfileButton.onclick = async (e) => {
         if (profile !== null) {
             
             const patName    = (profile[0].name !== "")           ? profile[0].name : "Not Recorded";
-            const patHN      = (profile[0].health_care_num !== 0) ? profile[0].healthcare_num : 0;
+            const patHN      = (profile[0].healthcare_num !== 0) ? profile[0].healthcare_num : 0;
             const patDob     = (profile[0].dob !== null)          ? profile[0].dob : "Not Recorded" ;
             const patweight  = (profile[0].weight !== 0)          ? profile[0].weight : 0;
             const patheight  = (profile[0].height !== 0)          ? profile[0].height : 0;
@@ -189,17 +189,46 @@ getPatientListButton.onclick = async (e) => {
 
     try {
         const patientPrincipals = await actor.doc_check_doc_patientList();
-        console.log(patientPrincipals);
+        console.log("These are the patient: "+patientPrincipals);
+
+        patientPrincipals.forEach((value, key) => {
+            console.log("Patient Principal:", key);
+            console.log("Associated Doctor Principal:", value);
+        });
+
+        for (const nestedPrincipal of patientPrincipals) {
+            console.log("Nested principal: ", nestedPrincipal); // Log nestedPrincipal to understand its structure
+
+            // Assuming nestedPrincipal is the correct format for the principal
+            const key = nestedPrincipal.__principal__; // Access the correct principal value
+
+            const result = await actor.check_patName(key);
+            console.log("name: " + result);
+            
+            const listItem = document.createElement("li");
+            listItem.textContent = result;
+            document.getElementById("resultsList").appendChild(listItem);
+        }
+        /*
+        for (const key of patientPrincipals) {
+            const result = await actor.check_patName(key);
+            console.log("name: " + result);
+            
+            const listItem = document.createElement("li");
+            listItem.textContent = result;
+            document.getElementById("resultsList").appendChild(listItem);
+        }*/
+        /*
         patientPrincipals.forEach(async(key) => {
-            const result = await check_patName(key);
-            console.log(result);
+            const result = await actor.check_patName(key);
+            console.log("name: "+result);
             
             const listItem = document.createElement("li");
             listItem.textContent = result;
             document.getElementById("resultsList").appendChild(listItem);
             
           });
-
+*/
     } catch (error) {
         console.error("Error fetching patient list:", error);
         document.getElementById("profileInfoDiv").innerText= "Error fetching profile.";

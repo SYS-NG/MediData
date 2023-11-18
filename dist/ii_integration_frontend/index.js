@@ -18738,7 +18738,6 @@ exports.undefined_ = undefined_;
 (function(nacl) {
 'use strict';
 
-
 // Ported in 2014 by Dmitry Chestnykh and Devi Mandiri.
 // Public domain.
 //
@@ -21184,6 +21183,7 @@ const idlFactory = ({ IDL }) => {
         [IDL.Opt(accessLog)],
         ['query'],
       ),
+    'check_patName' : IDL.Func([IDL.Principal], [IDL.Text], ['query']),
     'check_patRecord' : IDL.Func(
         [IDL.Principal],
         [IDL.Opt(patData)],
@@ -22256,7 +22256,10 @@ loginButton.onclick = async (e) => {
         });
     });
     const identity = authClient.getIdentity();
-    const agent = new _dfinity_agent__WEBPACK_IMPORTED_MODULE_2__.HttpAgent({ identity });
+    const agent = new _dfinity_agent__WEBPACK_IMPORTED_MODULE_2__.HttpAgent({
+        identity,
+        verifyQuerySignatures: false,
+    });
     actor = (0,_declarations_ii_integration_backend__WEBPACK_IMPORTED_MODULE_0__.createActor)("bkyz2-fmaaa-aaaaa-qaaaq-cai", {
         agent,
     });
@@ -22281,34 +22284,65 @@ addPatientRecordButton.onclick = async (e) => {
     return false;
 };
 
+const acceptNewDocButton = document.getElementById("acceptNewDoc");
+acceptNewDocButton.onclick = async (e) => {
+    e.preventDefault();
+    const tempKey = parseInt(document.getElementById("doctorAcceptanceKey").value, 10);
+
+    try {
+        await actor.acceptNewDoc(tempKey);
+        document.getElementById("acceptDocResp").innerText = "Doctor was accepted";
+        console.log("Doctor was accepted");
+    } catch (error) {
+        console.error("error accepting doctor:", error);
+    }
+
+    return false;
+};
+
 
 const makeProfileButton = document.getElementById("createProfile");
 makeProfileButton.onclick = async (e) => {
     e.preventDefault();
 
     const name = document.getElementById("name").value;
-    const h_id = parseInt(document.getElementById("h_id").value,10);
-    const weight = parseInt(document.getElementById("weight").value,10);
-    const height = parseInt(document.getElementById("height").value,10);
+    const h_id = parseInt(document.getElementById("h_id").value);
+    const weight = parseInt(document.getElementById("weight").value);
+    const height = parseInt(document.getElementById("height").value);
     const sex = document.getElementById("sex").value;
     const gender = document.getElementById("gender").value;
     const age = document.getElementById("age").value;
-    const history = document.getElementById("history").value;
-
+   // let historyArr = [];
+  //  const history = document.getElementById("history").value;
+  const history = [];
+  const patPrinc = await actor.whoami();///document.getElementById("patPrincipal").value;
     
+   // historyArr.push(history);
+
     const profile = {
         name: name,
-        health_care_num: h_id,
-        dob:age,
+        healthcare_num: h_id,
+        dob:age,    
         weight:weight,
         height:height,
         sex:sex,
         gender:gender,
-        history:null
+        history:history
+        /*
+        newName: name,
+        newHC_num: h_id,
+        newDoB:age,    
+        newWeight:weight,
+        newHeight:height,
+        newSex:sex,
+        newGender:gender,
+        newHistory:history*/
     };
 
     try {
-        await actor.init_patient_record(profile);
+  
+       
+        await actor.update_patient_record(patPrinc,profile);
 
         console.log("profile was made");
     } catch (error) {
@@ -22317,17 +22351,37 @@ makeProfileButton.onclick = async (e) => {
 
     return false;
 };
+
 const getProfileButton = document.getElementById("getProfile");
 getProfileButton.onclick = async (e) => {
     e.preventDefault();
     getProfileButton.setAttribute("disabled", true);
+    const principal = await actor.whoami();
 
     try {
         const principal = await actor.whoami();
-        const profile = await actor.check_patRecord(principal);
+        const profile   = await actor.check_patRecord(principal);
         
         if (profile !== null) {
-            document.getElementById("profileInfoDiv").innerText = JSON.stringify(profile, null, 2);
+            
+            const patName    = (profile[0].name !== "")           ? profile[0].name : "Not Recorded";
+            const patHN      = (profile[0].healthcare_num !== 0) ? profile[0].healthcare_num : 0;
+            const patDob     = (profile[0].dob !== null)          ? profile[0].dob : "Not Recorded" ;
+            const patweight  = (profile[0].weight !== 0)          ? profile[0].weight : 0;
+            const patheight  = (profile[0].height !== 0)          ? profile[0].height : 0;
+            const patsex     = (profile[0].sex !== "")            ? profile[0].sex : "Not Recorded";
+            const patgender  = (profile[0].gender !== "")         ? profile[0].gender : "Not Recorded" ;
+            // const pathistory = profile[0].history;
+
+            document.getElementById("myName").innerText   = patName;
+            document.getElementById("myHN").innerText     = patHN;
+            document.getElementById("myDob").innerText    = patDob;
+            document.getElementById("myWeight").innerText = patweight;
+            document.getElementById("myHeight").innerText = patheight;
+            document.getElementById("mySex").innerText    = patsex;
+            document.getElementById("myGender").innerText = patgender;
+            // document.getElementById("myHist").innerText   = pathistory;
+        
         } else {
             document.getElementById("profileInfoDiv").innerText = "Profile not found.";
         }
@@ -22340,7 +22394,6 @@ getProfileButton.onclick = async (e) => {
     return false;
 };
 
-
 /// add new patient button
 const addPatientButton = document.getElementById("addPatient");
 addPatientButton.onclick = async (e) => {
@@ -22350,6 +22403,7 @@ addPatientButton.onclick = async (e) => {
     try {
         const p_key = await actor.addNewPatient();
         
+        document.getElementById("tempKeydisp").innerText = "Gererated key: " + p_key;
         console.log("Generated key: "+p_key);
     } catch (error) {
         console.error("Error fetching key:", error);
@@ -22365,14 +22419,47 @@ getPatientListButton.onclick = async (e) => {
     getPatientListButton.setAttribute("disabled", true);
 
     try {
-        const principal = await actor.whoami();
-        const patientList = await actor.check_doc_patientList(principal);
-        console.log(patientList);
-        patientList.forEach((key, value) => {
-            console.log(`Patient: ${value}`);
-            //// retrieve name and output as a lisit
-          });
+        const patientPrincipals = await actor.doc_check_doc_patientList();
+        console.log("These are the patient: "+patientPrincipals);
 
+        patientPrincipals.forEach((value, key) => {
+            console.log("Patient Principal:", key);
+            console.log("Associated Doctor Principal:", value);
+        });
+
+        for (const nestedPrincipal of patientPrincipals) {
+            console.log("Nested principal: ", nestedPrincipal); // Log nestedPrincipal to understand its structure
+
+            // Assuming nestedPrincipal is the correct format for the principal
+            const key = nestedPrincipal.__principal__; // Access the correct principal value
+
+            const result = await actor.check_patName(key);
+            console.log("name: " + result);
+            
+            const listItem = document.createElement("li");
+            listItem.textContent = result;
+            document.getElementById("resultsList").appendChild(listItem);
+        }
+        /*
+        for (const key of patientPrincipals) {
+            const result = await actor.check_patName(key);
+            console.log("name: " + result);
+            
+            const listItem = document.createElement("li");
+            listItem.textContent = result;
+            document.getElementById("resultsList").appendChild(listItem);
+        }*/
+        /*
+        patientPrincipals.forEach(async(key) => {
+            const result = await actor.check_patName(key);
+            console.log("name: "+result);
+            
+            const listItem = document.createElement("li");
+            listItem.textContent = result;
+            document.getElementById("resultsList").appendChild(listItem);
+            
+          });
+*/
     } catch (error) {
         console.error("Error fetching patient list:", error);
         document.getElementById("profileInfoDiv").innerText= "Error fetching profile.";
@@ -22405,6 +22492,7 @@ switchPageButton1.onclick = async (e) => {
     
     return false;
 };
+
 })();
 
 /******/ })()
