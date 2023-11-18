@@ -31,7 +31,10 @@ loginButton.onclick = async (e) => {
         });
     });
     const identity = authClient.getIdentity();
-    const agent = new HttpAgent({ identity });
+    const agent = new HttpAgent({
+        identity,
+        verifyQuerySignatures: false,
+    });
     actor = createActor(process.env.CANISTER_ID_II_INTEGRATION_BACKEND, {
         agent,
     });
@@ -117,10 +120,28 @@ getProfileButton.onclick = async (e) => {
 
     try {
         const principal = await actor.whoami();
-        const profile = await actor.check_patRecord(principal);
+        const profile   = await actor.check_patRecord(principal);
         
         if (profile !== null) {
-            document.getElementById("profileInfoDiv").innerText = JSON.stringify(profile, null, 2);
+            
+            const patName    = (profile[0].name !== "")           ? profile[0].name : "Not Recorded";
+            const patHN      = (profile[0].health_care_num !== 0) ? profile[0].healthcare_num : 0;
+            const patDob     = (profile[0].dob !== null)          ? profile[0].dob : "Not Recorded" ;
+            const patweight  = (profile[0].weight !== 0)          ? profile[0].weight : 0;
+            const patheight  = (profile[0].height !== 0)          ? profile[0].height : 0;
+            const patsex     = (profile[0].sex !== "")            ? profile[0].sex : "Not Recorded";
+            const patgender  = (profile[0].gender !== "")         ? profile[0].gender : "Not Recorded" ;
+            // const pathistory = profile[0].history;
+
+            document.getElementById("myName").innerText   = patName;
+            document.getElementById("myHN").innerText     = patHN;
+            document.getElementById("myDob").innerText    = patDob;
+            document.getElementById("myWeight").innerText = patweight;
+            document.getElementById("myHeight").innerText = patheight;
+            document.getElementById("mySex").innerText    = patsex;
+            document.getElementById("myGender").innerText = patgender;
+            // document.getElementById("myHist").innerText   = pathistory;
+        
         } else {
             document.getElementById("profileInfoDiv").innerText = "Profile not found.";
         }
@@ -132,7 +153,6 @@ getProfileButton.onclick = async (e) => {
     }
     return false;
 };
-
 
 /// add new patient button
 const addPatientButton = document.getElementById("addPatient");
