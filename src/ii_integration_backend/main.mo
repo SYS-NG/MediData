@@ -1,5 +1,4 @@
 import Hashmap "mo:base/HashMap";
-import List "mo:base/List";
 import Principal "mo:base/Principal"; 
 import Result "mo:base/Result";
 import Time "mo:base/Time";
@@ -24,8 +23,8 @@ actor {
   public type Time = Time.Time;
 
   // Patient
-  public type accessLog  = List.List<Text>;
-  public type patHist    = List.List<Text>;
+  public type accessLog  = Buffer.Buffer<Text>;
+  public type patHist    = Buffer.Buffer<Text>;
   public type patBuff    = Buffer.Buffer<Principal>;
   public type patData    = {
     name           : Text; 
@@ -36,6 +35,26 @@ actor {
     sex            : Text;
     gender         : Text;
     history        : patHist;
+  };
+  public type patData_histIsText = {
+    name           : Text; 
+    healthcare_num : Nat;
+    dob            : Text; 
+    weight         : Nat;
+    height         : Nat;
+    sex            : Text;
+    gender         : Text;
+    history        : Text;
+  };
+  public type patData_histIsArr = {
+    name           : Text; 
+    healthcare_num : Nat;
+    dob            : Text; 
+    weight         : Nat;
+    height         : Nat;
+    sex            : Text;
+    gender         : Text;
+    history        : [Text];
   };
 
   public type docData = {
@@ -48,7 +67,7 @@ actor {
   let eq: (Nat,Nat) ->Bool = func(x, y) { x == y };
   let keyHash: (Nat) -> Hash.Hash = func(x) { Prim.natToNat32 x };
   let keyToDoc     : Hashmap.HashMap<Nat, Principal>       = Hashmap.HashMap<Nat, Principal> (0, eq, keyHash);
-  let docToPatList : Hashmap.HashMap<Principal, patBuff>   = Hashmap.HashMap<Principal, patBuff> (0, Principal.equal, Principal.hash);
+  let docToPatBuff : Hashmap.HashMap<Principal, patBuff>   = Hashmap.HashMap<Principal, patBuff> (0, Principal.equal, Principal.hash);
   let patToDoc     : Hashmap.HashMap<Principal, Principal> = Hashmap.HashMap<Principal, Principal> (0, Principal.equal, Principal.hash);
   let patToRecord  : Hashmap.HashMap<Principal, patData>   = Hashmap.HashMap<Principal, patData> (0, Principal.equal, Principal.hash);
   let docToDocData : Hashmap.HashMap<Principal, docData>   = Hashmap.HashMap<Principal, docData> (0, Principal.equal, Principal.hash);
@@ -137,12 +156,12 @@ actor {
       height: Nat           = 0;
       sex: Text             = "";
       gender: Text          = "";
-      history: patHist      = List.nil<Text>();
+      history: patHist      = Buffer.Buffer<Text>(5);
     };
     patToRecord.put(patPrincipal, newRecord);
 
-    var newLog : accessLog = List.nil<Text>();
-    newLog := List.push("Patient Record Created.", newLog);
+    var newLog : accessLog = Buffer.Buffer<Text>(5);
+    newLog.add("Patient Record Created.");
     patAccessLog.put(patPrincipal, newLog);
 
     return;
@@ -157,7 +176,7 @@ actor {
     switch (docPrincipal) {
       case (?docPrincipal) {
         patToDoc.put(caller, docPrincipal);
-        var curBuff : ?patBuff = docToPatList.get(docPrincipal);
+        var curBuff : ?patBuff = docToPatBuff.get(docPrincipal);
         var nxtBuff : patBuff  = Buffer.Buffer<Principal>(5);
 
         switch(curBuff) {
@@ -166,35 +185,26 @@ actor {
         };
 
         nxtBuff.add(caller);
-        docToPatList.put(docPrincipal, nxtBuff);
+        docToPatBuff.put(docPrincipal, nxtBuff);
         keyToDoc.delete(tempKey);
       };
       case null {};
     };
 
     // Create Patient Record if does not exist
-    if (patAccessLog.get(caller) == null)
-    {
-      await addPatRecord(caller);
+    var curAccessLog : ?accessLog = patAccessLog.get(caller);
+    switch(curAccessLog) {
+      case null {
+        await addPatRecord(caller);
+      };
+      case (?curAccessLog) {};
     };
 
     return; 
   }; 
 
   //*Update: Result type. 
-  public shared({caller}) func init_patient_record(patPrincipal: Principal, initRecord : patData) : async Result.Result<Text, Text> {
-    var oldRecord : ?patData = patToRecord.get(patPrincipal);
-    switch(oldRecord) {
-      case(null) return #err("There is no patient record for this Patient");
-      case(?oldRecord) {
-        patToRecord.put(patPrincipal, initRecord); 
-        return #err("Record Initialized"); 
-      };
-    };
-  };
-
-  //*Update: Result type. 
-  public shared({caller}) func update_patient_record(patPrincipal: Principal, updateRecord : patData) : async Result.Result<Text, Text> {
+  public shared({caller}) func update_patient_record(patPrincipal: Principal, updateRecord : patData_histIsText) : async Result.Result<Text, Text> {
     var curRecord : ?patData = patToRecord.get(patPrincipal);
     switch(curRecord){
       case(null) return #err("There is no patient record for this Patient");
@@ -241,14 +251,10 @@ actor {
           case _  { newGender:= updateRecord.gender};
         };
 
-        var newHistory : List.List<Text> = List.nil<Text>();
-        switch (updateRecord.history) {
-          case null {
-            newHistory := curRecord.history;
-          };
-          case _  {
-            newHistory := List.append<Text>(curRecord.history, updateRecord.history);
-          };
+        var newHistory    : patHist = curRecord.history;
+        var updateHistory : Text    = updateRecord.history;
+        if (updateHistory != "") {
+          newHistory.add(updateHistory);
         };
 
         var newRecord : patData = {
@@ -267,8 +273,8 @@ actor {
         switch (curLog) {
           case null {};
           case (?curLog) {
-            var newLog : accessLog = List.push("Record Modified", curLog);
-            patAccessLog.put(patPrincipal, newLog);
+            curLog.add("Record Modified.");
+            patAccessLog.put(patPrincipal, curLog);
           };
         };
       };
@@ -277,7 +283,7 @@ actor {
   };
 
   //* Logged Docotor reading Patient Data 
-  public shared({caller}) func logged_pat_check_patRecord(patPrincipal: Principal) : async ?patData{
+  public shared({caller}) func logged_pat_check_patRecord(patPrincipal: Principal) : async patData_histIsArr{
 
     var accessLogMsg : Text = "";
     var success      : Bool = false;
@@ -288,7 +294,7 @@ actor {
       case (?doctorInfo) {
         var doctor_name = doctorInfo.name;
         if (doctor_name != "") {
-          var doc_s_Patients : ?patBuff = docToPatList.get(caller);
+          var doc_s_Patients : ?patBuff = docToPatBuff.get(caller);
           switch (doc_s_Patients) {
             case null {
               accessLogMsg := "Read Access Denied: Patient not under doctor";
@@ -317,22 +323,64 @@ actor {
     switch (curLog) {
       case null {};
       case (?curLog) {
-        var newLog : accessLog = List.push(accessLogMsg, curLog);
-        patAccessLog.put(patPrincipal, newLog);
+        curLog.add(accessLogMsg);
+        patAccessLog.put(patPrincipal, curLog);
       };
     };
 
     if (success) {
-      return(patToRecord.get(patPrincipal));
+      var patRecord : ?patData = patToRecord.get(patPrincipal);
+
+      switch (patRecord) {
+        case (?patRecord) {
+          var patRecord_histIsArr : patData_histIsArr = {
+            name           = patRecord.name;
+            healthcare_num = patRecord.healthcare_num;
+            dob            = patRecord.dob;
+            weight         = patRecord.weight;
+            height         = patRecord.height;
+            sex            = patRecord.sex;
+            gender         = patRecord.gender;
+            history        = Buffer.toArray<Text>(patRecord.history);
+          };
+          return patRecord_histIsArr;
+        };
+
+        case null {
+          var patRecord_histIsArr : patData_histIsArr = {
+            name           = "No Record";
+            healthcare_num = 0;
+            dob            = "No Record";
+            weight         = 0;
+            height         = 0;
+            sex            = "No Record";
+            gender         = "No Record";
+            history        = ["No Record"];
+          };
+          return patRecord_histIsArr;
+        };
+      }
+
     } else {
-      return null;
+      var patRecord_histIsArr : patData_histIsArr = {
+        name           = "No Access";
+        healthcare_num = 0;
+        dob            = "No Access";
+        weight         = 0;
+        height         = 0;
+        sex            = "No Access";
+        gender         = "No Access";
+        history        = ["No Access"];
+      };
+      return patRecord_histIsArr;
     }
+    
   };
 
 //=============================================================READ/QUERIES========================================
 
   public shared({caller}) func doc_check_doc_patientList() : async [Principal]{
-    var patBuffer : ?patBuff= docToPatList.get(caller);
+    var patBuffer : ?patBuff= docToPatBuff.get(caller);
     switch (patBuffer) {
       case null {};
       case (?patBuffer) {
@@ -343,7 +391,7 @@ actor {
   };
 
   public query func check_doc_patientList(docPrincipal : Principal) : async [Principal]{
-    var patBuffer : ?patBuff = docToPatList.get(docPrincipal);
+    var patBuffer : ?patBuff = docToPatBuff.get(docPrincipal);
     switch (patBuffer) {
       case null {};
       case (?patBuffer) {
@@ -364,8 +412,38 @@ actor {
   };
 
   //* Read: Optional Type needed 
-  public query func check_patRecord(patPrincipal: Principal) : async ?patData{
-    return(patToRecord.get(patPrincipal));
+  public query func check_patRecord(patPrincipal: Principal) : async patData_histIsArr{
+    var patRecord : ?patData = patToRecord.get(patPrincipal);
+
+    switch (patRecord) {
+      case (?patRecord) {
+        var patRecord_histIsArr : patData_histIsArr = {
+          name           = patRecord.name;
+          healthcare_num = patRecord.healthcare_num;
+          dob            = patRecord.dob;
+          weight         = patRecord.weight;
+          height         = patRecord.height;
+          sex            = patRecord.sex;
+          gender         = patRecord.gender;
+          history        = Buffer.toArray<Text>(patRecord.history);
+        };
+        return patRecord_histIsArr;
+      };
+
+      case null {
+        var patRecord_histIsArr : patData_histIsArr = {
+          name           = "No Record";
+          healthcare_num = 0;
+          dob            = "No Record";
+          weight         = 0;
+          height         = 0;
+          sex            = "No Record";
+          gender         = "No Record";
+          history        = ["No Record"];
+        };
+        return patRecord_histIsArr;
+      };
+    }
   };
   
   //* Read: Optional Type needed 
@@ -381,8 +459,14 @@ actor {
   };
 
   //* Read: Optional Type needed 
-  public query func check_patAccessLog(patPrincipal: Principal) : async ?accessLog{
-    return(patAccessLog.get(patPrincipal));
+  public query func check_patAccessLog(patPrincipal: Principal) : async [Text]{
+    var pat_accessLog : ?accessLog = patAccessLog.get(patPrincipal);
+    switch (pat_accessLog) {
+      case null {return [""]};
+      case (?pat_accessLog) {
+        return Buffer.toArray<Text>(pat_accessLog);
+      };
+    }
   };
 
   //* Read: Optional Type needed 
