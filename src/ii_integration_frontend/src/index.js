@@ -194,12 +194,16 @@ getPatientListButton.onclick = async (e) => {
     getPatientListButton.setAttribute("disabled", true);
 
     try {
-        const principal = await actor.whoami();
-        const patientList = await actor.check_doc_patientList(principal);
-        console.log(patientList);
-        patientList.forEach((key, value) => {
-            console.log(`Patient: ${value}`);
-            //// retrieve name and output as a lisit
+        const patientPrincipals = await actor.doc_check_doc_patientList();
+        console.log(patientPrincipals);
+        patientPrincipals.forEach(async(key) => {
+            const result = await check_patName(key);
+            console.log(result);
+            
+            const listItem = document.createElement("li");
+            listItem.textContent = result;
+            document.getElementById("resultsList").appendChild(listItem);
+            
           });
 
     } catch (error) {
