@@ -136,7 +136,7 @@ getProfileButton.onclick = async (e) => {
             const patheight  = (profile.height !== 0)          ? profile.height  : 0;
             const patsex     = (profile.sex !== "")            ? profile.sex     : "Not Recorded";
             const patgender  = (profile.gender !== "")         ? profile.gender  : "Not Recorded" ;
-            const pathistory = (profile.history.length > 0)    ? profile.history : ["Not Recorded"] ;
+            const pathistory = (profile.history.length > 0)    ? profile.history : [] ;
 
             document.getElementById("myName").innerText   = patName;
             document.getElementById("myHN").innerText     = patHN;
@@ -145,7 +145,16 @@ getProfileButton.onclick = async (e) => {
             document.getElementById("myHeight").innerText = patheight;
             document.getElementById("mySex").innerText    = patsex;
             document.getElementById("myGender").innerText = patgender;
-            // document.getElementById("myHist").innerText   = pathistory;
+
+            document.getElementById("myHist").innerHTML   = "";
+
+            for (const historyNote of pathistory.reverse()) {
+                console.log(historyNote);
+
+                const listItem = document.createElement("li");
+                listItem.textContent = historyNote;
+                document.getElementById("myHist").appendChild(listItem);
+            }
         
         } else {
             document.getElementById("profileInfoDiv").innerText = "Profile not found.";
