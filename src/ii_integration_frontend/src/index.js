@@ -80,43 +80,37 @@ const makeProfileButton = document.getElementById("createProfile");
 makeProfileButton.onclick = async (e) => {
     e.preventDefault();
 
-    const name = document.getElementById("name").value;
-    const h_id = parseInt(document.getElementById("h_id").value);
-    const weight = parseInt(document.getElementById("weight").value);
-    const height = parseInt(document.getElementById("height").value);
-    const sex = document.getElementById("sex").value;
-    const gender = document.getElementById("gender").value;
-    const age = document.getElementById("age").value;
-   // let historyArr = [];
-  //  const history = document.getElementById("history").value;
-  const history = [];
-  const patPrinc = await actor.whoami();///document.getElementById("patPrincipal").value;
-    
-   // historyArr.push(history);
+    const name    = document.getElementById("name").value;
+    const sex     = document.getElementById("sex").value;
+    const gender  = document.getElementById("gender").value;
+    const dob     = document.getElementById("dob").value;
+    var   h_id    = parseInt(document.getElementById("h_id").value);
+    var   weight  = parseInt(document.getElementById("weight").value);
+    var   height  = parseInt(document.getElementById("height").value);
+    const history = document.getElementById("history").value;
+    console.log(history);
+
+    h_id   = (isNaN(h_id))   ? 0 : h_id  ;
+    weight = (isNaN(weight)) ? 0 : weight;
+    height = (isNaN(height)) ? 0 : height;
+
+    let historyArr = [];
+    historyArr.push(history);
+
+    const patPrinc = await actor.whoami();///document.getElementById("patPrincipal").value;
 
     const profile = {
         name: name,
         healthcare_num: h_id,
-        dob:age,    
+        dob:dob,    
         weight:weight,
         height:height,
         sex:sex,
         gender:gender,
-        history:history
-        /*
-        newName: name,
-        newHC_num: h_id,
-        newDoB:age,    
-        newWeight:weight,
-        newHeight:height,
-        newSex:sex,
-        newGender:gender,
-        newHistory:history*/
+        history:[historyArr],
     };
 
     try {
-  
-       
         await actor.update_patient_record(patPrinc,profile);
 
         console.log("profile was made");
