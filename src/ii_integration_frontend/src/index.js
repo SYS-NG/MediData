@@ -185,21 +185,12 @@ getPatientListButton.onclick = async (e) => {
 
     try {
         const patientPrincipals = await actor.doc_check_doc_patientList();
-        console.log("These are the patient: "+patientPrincipals);
 
-        patientPrincipals.forEach((value, key) => {
-            console.log("Patient Principal:", key);
-            console.log("Associated Doctor Principal:", value);
-        });
+        document.getElementById("resultsList").innerHTML = "";
 
         for (const nestedPrincipal of patientPrincipals) {
-            console.log("Nested principal: ", nestedPrincipal); // Log nestedPrincipal to understand its structure
-
-            // Assuming nestedPrincipal is the correct format for the principal
-            const key = nestedPrincipal.__principal__; // Access the correct principal value
-
-            const result = await actor.check_patName(key);
-            console.log("name: " + result);
+            const result = await actor.check_patName(nestedPrincipal);
+            console.log("Name: " + result);
             
             const listItem = document.createElement("li");
             listItem.textContent = result;
