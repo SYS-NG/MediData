@@ -78,30 +78,43 @@ makeProfileButton.onclick = async (e) => {
     e.preventDefault();
 
     const name = document.getElementById("name").value;
-    const h_id = parseInt(document.getElementById("h_id").value,10);
-    const weight = parseInt(document.getElementById("weight").value,10);
-    const height = parseInt(document.getElementById("height").value,10);
+    const h_id = parseInt(document.getElementById("h_id").value);
+    const weight = parseInt(document.getElementById("weight").value);
+    const height = parseInt(document.getElementById("height").value);
     const sex = document.getElementById("sex").value;
     const gender = document.getElementById("gender").value;
     const age = document.getElementById("age").value;
-    const history = document.getElementById("history").value;
-
+   // let historyArr = [];
+  //  const history = document.getElementById("history").value;
+  const history = [];
+  const patPrinc = await actor.whoami();///document.getElementById("patPrincipal").value;
     
+   // historyArr.push(history);
+
     const profile = {
         name: name,
-        health_care_num: h_id,
-        dob:age,
+        healthcare_num: h_id,
+        dob:age,    
         weight:weight,
         height:height,
         sex:sex,
         gender:gender,
-        history:null
+        history:history
+        /*
+        newName: name,
+        newHC_num: h_id,
+        newDoB:age,    
+        newWeight:weight,
+        newHeight:height,
+        newSex:sex,
+        newGender:gender,
+        newHistory:history*/
     };
 
     try {
-        const principal = await actor.whoami();
-        const patprin = await actor.check_doc_patientList(principal);
-        await actor.init_patient_record(profile);
+  
+       
+        await actor.update_patient_record(patPrinc,profile);
 
         console.log("profile was made");
     } catch (error) {
@@ -110,17 +123,28 @@ makeProfileButton.onclick = async (e) => {
 
     return false;
 };
+
 const getProfileButton = document.getElementById("getProfile");
 getProfileButton.onclick = async (e) => {
     e.preventDefault();
     getProfileButton.setAttribute("disabled", true);
+    const principal = await actor.whoami();
 
     try {
-        const principal = await actor.whoami();
         const profile = await actor.check_patRecord(principal);
+        console.log(profile);
+        console.log(profile[0])
         
         if (profile !== null) {
-            document.getElementById("profileInfoDiv").innerText = JSON.stringify(profile, null, 2);
+            console.log(profile[0].name);
+            console.log(profile[0].healthcare_num);
+            console.log(profile[0].dob);
+            console.log(profile[0].weight);
+            console.log(profile[0].height);
+            console.log(profile[0].sex);
+            console.log(profile[0].gender);
+            console.log(profile[0].history);
+            //document.getElementById("profileInfoDiv").innerText = JSON.stringify(profile, null, 2);
         } else {
             document.getElementById("profileInfoDiv").innerText = "Profile not found.";
         }
