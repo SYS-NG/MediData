@@ -7,13 +7,22 @@ import { HttpAgent } from "@dfinity/agent";
 
 let actor = ii_integration_backend;
 console.log(process.env.CANISTER_ID_INTERNET_IDENTITY);
-const whoAmIButton = document.getElementById("whoAmI");
+const whoAmIButton = document.getElementById("whoAmI")||document.getElementById("whoAmI2");
 whoAmIButton.onclick = async (e) => {
     e.preventDefault();
     whoAmIButton.setAttribute("disabled", true);
     const principal = await actor.whoami();
     whoAmIButton.removeAttribute("disabled");
     document.getElementById("principal").innerText = principal.toString();
+    return false;
+};
+const whoAmIButtonPat = document.getElementById("whoAmI2");
+whoAmIButtonPat.onclick = async (e) => {
+    e.preventDefault();
+    whoAmIButtonPat.setAttribute("disabled", true);
+    const principal = await actor.whoami();
+    whoAmIButtonPat.removeAttribute("disabled");
+    document.getElementById("principal2").innerText = principal.toString();
     return false;
 };
 const loginButton = document.getElementById("login");
@@ -40,6 +49,33 @@ loginButton.onclick = async (e) => {
     });
     return false;
 };
+
+
+const patLoginButton = document.getElementById("login2");
+patLoginButton.onclick = async (e) => {
+    e.preventDefault();
+    let authClient = await AuthClient.create();
+    // start the login process and wait for it to finish
+    await new Promise((resolve) => {
+        authClient.login({
+            identityProvider:
+                process.env.DFX_NETWORK === "ic"
+                    ? "https://identity.ic0.app"
+                    : `http://localhost:4943/?canisterId=rdmx6-jaaaa-aaaaa-aaadq-cai`,
+            onSuccess: resolve,
+        });
+    });
+    const identity = authClient.getIdentity();
+    const agent = new HttpAgent({
+        identity,
+        verifyQuerySignatures: false,
+    });
+    actor = createActor(process.env.CANISTER_ID_II_INTEGRATION_BACKEND, {
+        agent,
+    });
+    return false;
+};
+
 
 const acceptNewDocButton = document.getElementById("acceptNewDoc");
 acceptNewDocButton.onclick = async (e) => {
