@@ -12,6 +12,10 @@
         box-sizing: border-box;
     }
 
+    button{
+        padding: 10px 24px;
+    }
+
     .container{
         display: flex;
         width: 100%;
