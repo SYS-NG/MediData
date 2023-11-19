@@ -11,11 +11,10 @@ img {
 }
 
 form {
-    display: flex;
+    display: block;
+    text-align: center;
     justify-content: center;
     gap: 0.5em;
-    flex-flow: row wrap;
-    max-width: 40vw;
     margin: auto;
     align-items: baseline;
 }
@@ -67,7 +66,7 @@ ul.navigation {
   .header {
     padding: 12px;
     text-align: center;
-    background: rgb(160, 255, 141);
+    background: #7d8baf
   }
   
   .header h1 {
