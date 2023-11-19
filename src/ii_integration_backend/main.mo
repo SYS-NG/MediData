@@ -96,6 +96,17 @@ actor {
   public shared ({caller}) func addNewPatient() : async ?Nat {
     var tempKey = await genTempKey();
 
+    var isValidDoc : Bool = await checkValidDoctorInfo();
+    if (isValidDoc != true) {
+      // Create Sample Doctor for now
+      var sampleDoc : docData = {
+        name    = "Dr. Chain Shift";
+        doc_num = 888888; 
+        title   = "Best Doctor On Record";
+      };
+      docToDocData.put(caller, sampleDoc);
+    };
+
     switch(tempKey) {
       case (?tempKey) {keyToDoc.put(tempKey, caller)};
       case null {};
@@ -205,6 +216,7 @@ actor {
 
   //*Update: Result type. 
   public shared({caller}) func update_patient_record(patPrincipal: Principal, updateRecord : patData_histIsText) : async Result.Result<Text, Text> {
+    
     var curRecord : ?patData = patToRecord.get(patPrincipal);
     switch(curRecord){
       case(null) return #err("There is no patient record for this Patient");
@@ -251,9 +263,16 @@ actor {
           case _  { newGender:= updateRecord.gender};
         };
 
-        var newHistory    : patHist = curRecord.history;
-        var updateHistory : Text    = updateRecord.history;
+        var newHistory    : patHist  = curRecord.history;
+        var updateHistory : Text     = updateRecord.history;
+        var doctor_data   : ?docData = docToDocData.get(caller);
+
+
         if (updateHistory != "") {
+          switch (doctor_data) {
+            case null {};
+            case (?doctor_data) {updateHistory := doctor_data.name # ":  " # updateHistory};
+          };
           newHistory.add(updateHistory);
         };
 
@@ -279,7 +298,7 @@ actor {
         };
       };
     };
-    return #err("Record modified"); 
+    return #ok("Record modified"); 
   };
 
   //* Logged Docotor reading Patient Data 
