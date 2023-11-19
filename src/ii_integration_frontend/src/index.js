@@ -125,6 +125,7 @@ getProfileButton.onclick = async (e) => {
     try {
         const principal = await actor.whoami();
         const profile   = await actor.check_patRecord(principal);
+        const logs      = await actor.check_patAccessLog(principal);
         console.log(profile);
         
         if (profile !== null) {
@@ -147,7 +148,6 @@ getProfileButton.onclick = async (e) => {
             document.getElementById("myGender").innerText = patgender;
 
             document.getElementById("myHist").innerHTML   = "";
-
             for (const historyNote of pathistory.reverse()) {
                 console.log(historyNote);
 
@@ -159,6 +159,17 @@ getProfileButton.onclick = async (e) => {
         } else {
             document.getElementById("profileInfoDiv").innerText = "Profile not found.";
         }
+        
+        if (logs.length > 0) {
+            document.getElementById("myLog").innerHTML   = "";
+            for (const log of logs.reverse()) {
+                const listItem = document.createElement("li");
+                listItem.textContent = log;
+                document.getElementById("myLog").appendChild(listItem);
+            }
+
+        }
+
     } catch (error) {
         console.error("Error fetching profile:", error);
         document.getElementById("profileInfoDiv").innerText= "Error fetching profile.";

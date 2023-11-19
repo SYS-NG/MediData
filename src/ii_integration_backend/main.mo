@@ -288,11 +288,18 @@ actor {
         };
         patToRecord.put(patPrincipal, newRecord); 
 
+        var doctor_info : ?docData = docToDocData.get(caller);
+        var doctor_name : Text     = "";
+        switch (doctor_info) {
+          case null {};
+          case (?doctor_info) {doctor_name := doctor_info.name};
+        };
+
         var curLog : ?accessLog       = patAccessLog.get(patPrincipal);
         switch (curLog) {
           case null {};
           case (?curLog) {
-            curLog.add("Record Modified.");
+            curLog.add("Record Modified by: " # doctor_name);
             patAccessLog.put(patPrincipal, curLog);
           };
         };
