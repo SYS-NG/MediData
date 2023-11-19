@@ -49,7 +49,7 @@ Follow these steps to get started with MediData:
 
 ## Team
 - Alden Lien
-- Jack Li
+- Jack Li - [@jackl16](https://github.com/jackl16)
 - Steven Ng - [@SYS-NG](https://github.com/SYS-NG)
 
 ## Acknowledgments
