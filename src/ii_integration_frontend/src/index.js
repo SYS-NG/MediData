@@ -50,6 +50,7 @@ loginButton.onclick = async (e) => {
     return false;
 };
 
+
 const patLoginButton = document.getElementById("login2");
 patLoginButton.onclick = async (e) => {
     e.preventDefault();
@@ -75,24 +76,6 @@ patLoginButton.onclick = async (e) => {
     return false;
 };
 
-
-//add patient record
-
-const addPatientRecordButton = document.getElementById("addPatientData");
-addPatientRecordButton.onclick = async (e) => {
-    e.preventDefault();
-
-    try {
-        const principal = await actor.whoami();
-        await actor.addPatRecord(principal);
-
-        console.log("profile was created");
-    } catch (error) {
-        console.error("error creating profile:", error);
-    }
-
-    return false;
-};
 
 const acceptNewDocButton = document.getElementById("acceptNewDoc");
 acceptNewDocButton.onclick = async (e) => {

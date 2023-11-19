@@ -333,7 +333,7 @@ actor {
                 };
                 case true {
                   success := true;
-                  accessLogMsg := "Patient Record Viewed by: Doctor" # doctor_name;
+                  accessLogMsg := "Patient Record Viewed by: " # doctor_name;
                 };
               };
             };
@@ -478,7 +478,12 @@ actor {
     switch (PatRecord) {
       case null {};
       case (?PatRecord) {
-        return PatRecord.name;
+        if (PatRecord.name != "") {
+          return PatRecord.name;
+        }
+        else {
+          return "New Patient";
+        }
       };
     };
     return "";
