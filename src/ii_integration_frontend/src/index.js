@@ -7,24 +7,6 @@ import { HttpAgent } from "@dfinity/agent";
 
 let actor = ii_integration_backend;
 console.log(process.env.CANISTER_ID_INTERNET_IDENTITY);
-const whoAmIButton = document.getElementById("whoAmI")||document.getElementById("whoAmI2");
-whoAmIButton.onclick = async (e) => {
-    e.preventDefault();
-    whoAmIButton.setAttribute("disabled", true);
-    const principal = await actor.whoami();
-    whoAmIButton.removeAttribute("disabled");
-    document.getElementById("principal").innerText = principal.toString();
-    return false;
-};
-const whoAmIButtonPat = document.getElementById("whoAmI2");
-whoAmIButtonPat.onclick = async (e) => {
-    e.preventDefault();
-    whoAmIButtonPat.setAttribute("disabled", true);
-    const principal = await actor.whoami();
-    whoAmIButtonPat.removeAttribute("disabled");
-    document.getElementById("principal2").innerText = principal.toString();
-    return false;
-};
 const loginButton = document.getElementById("login");
 loginButton.onclick = async (e) => {
     e.preventDefault();
@@ -93,47 +75,6 @@ acceptNewDocButton.onclick = async (e) => {
     return false;
 };
 
-/*
-const makeProfileButton = document.getElementById("createProfile");
-makeProfileButton.onclick = async function(e) {
-    e.preventDefault();
-    
-    const name    = document.getElementById("name").value;
-    const sex     = document.getElementById("sex").value;
-    const gender  = document.getElementById("gender").value;
-    const dob     = document.getElementById("dob").value;
-    var   h_id    = parseInt(document.getElementById("h_id").value);
-    var   weight  = parseInt(document.getElementById("weight").value);
-    var   height  = parseInt(document.getElementById("height").value);
-    const history = document.getElementById("history").value;
-
-    h_id   = (isNaN(h_id))   ? 0 : h_id  ;
-    weight = (isNaN(weight)) ? 0 : weight;
-    height = (isNaN(height)) ? 0 : height;
-
-    const patPrinc = this.getAttribute("data-nestedPrincipal");
-
-    const profile = {
-        name: name,
-        healthcare_num: h_id,
-        dob:dob,    
-        weight:weight,
-        height:height,
-        sex:sex,
-        gender:gender,
-        history:history,
-    };
-
-    try {
-        await actor.update_patient_record(patPrinc,profile);
-        console.log("Profile Updated");
-    } catch (error) {
-        console.error("error creating profile:", error);
-    }
-
-    return false;
-};
-*/
 const getProfileButton = document.getElementById("getProfile");
 getProfileButton.onclick = async (e) => {
     e.preventDefault();
