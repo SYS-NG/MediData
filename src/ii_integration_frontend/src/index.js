@@ -248,6 +248,14 @@ getPatientListButton.onclick = async (e) => {
                 document.getElementById('page2').style.display = 'none';
                 document.getElementById('page3').style.display = 'block';
 
+                document.getElementById("Name").innerText   = "";
+                document.getElementById("HN").innerText     = "";
+                document.getElementById("Dob").innerText    = "";
+                document.getElementById("Weight").innerText = "";
+                document.getElementById("Height").innerText = "";
+                document.getElementById("Sex").innerText    = "";
+                document.getElementById("Gender").innerText = "";
+
                 try {
                     const profile   = await actor.logged_pat_check_patRecord(principal);
                     console.log(profile);
