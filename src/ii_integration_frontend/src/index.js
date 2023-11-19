@@ -295,6 +295,7 @@ getPatientListButton.onclick = async (e) => {
                     
                 });
     
+                document.getElementById("goBack").innerHTML = "";
                 document.getElementById("goBack").appendChild(backButton);
             });
 
