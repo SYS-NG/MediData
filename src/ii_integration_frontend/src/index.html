@@ -32,7 +32,7 @@
       </form>
       <br />
       <form>
-        <button id="addPatientData">Add patient data!</button>
+        <button id="addPatientData">Add patient record entry!</button>
       </form>
       <form id="profileForm">
         <label for="name">Name:</label>
@@ -58,8 +58,7 @@
         
         <label for="history">History:</label><br>
         <textarea id="history" name="history"></textarea><br><br>
-        
-        <button id="createProfile">Update Patient!</button>
+
     </form>
       <br />
       <form>
@@ -81,7 +80,7 @@
   </body>
 
 
-    <button onclick="switchToPage('page2')" id = "switch2">Go to Page 2</button>
+    <button  id = "switch2">Go to Page 2</button>
     
   </div>
   <div id="page2" style="display: none;" >
@@ -143,23 +142,61 @@
               </div>
           </div>
       </body>
-    <button onclick="switchToPage('page1')" id = "switch1">Go to Page 1</button>
+    <button  id = "switch1">Go to Page 1</button>
+  </div>
+  <div id="page3" style="display: none;" > 
+    <head>
+      <link rel="stylesheet" type ="text/css" href="Style.css">
+      </head>
+      <body>
+          <div class="container">
+              <div class="box">
+                  <ul>
+                      <h1>Patient Name</h1>
+                      <section id="Name"></section>
+                  </ul>
+                  <ul>
+                      <li>Healthcare #:</li>
+                      <section id="HN"></section>
+                  </ul>
+                  <br />
+                  <br />
+                  <section id="profileInfoDiv"></section>
+              </div>
+              <div class="about">
+                  <ul>
+                      <h1>about</h1>
+                  </ul>
+                  <ul>
+                      <h3>Date of Birth</h3>
+                      <li id="Dob"></li>
+                  </ul>
+                  <ul>
+                      <h3>Weight</h3>
+                      <li id="Weight"></li>
+                  </ul>
+                  <ul>
+                      <h3>Height</h3>
+                      <li id="Height"></li>
+                  </ul>
+                  <ul>
+                      <h3>Sex</h3>
+                      <li id="Sex"></li>
+                  </ul>
+                  <ul>
+                      <h3>Gender</h3>
+                      <p id="Gender"></p>
+                  </ul>
+                  <ul>
+                      <h3>History</h3>
+                      <li id="Hist"></li>
+                  </ul>
+              </div>
+          </div>
+      </body>
+      <section id="goBack"></section>
   </div>
 
-  <script>
-    function switchToPage(pageId) {
-      // Hide all pages
-      const pages = document.querySelectorAll('[id^="page"]');
-      pages.forEach(page => {
-        page.style.display = 'none';
-      });
-      console.log("pages should be switched");
-      // Show the selected page
-      const selectedPage = document.getElementById(pageId);
-      if (selectedPage) {
-        selectedPage.style.display = 'block';
-      }
-    }
-  </script>
+
 </body>
 </html>

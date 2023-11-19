@@ -208,6 +208,66 @@ getPatientListButton.onclick = async (e) => {
             const viewProfileButton = document.createElement("button");
             viewProfileButton.textContent = "View Patient Data!";
      
+            viewProfileButton.addEventListener("click", async function(event) {
+                console.log("Button pressed");
+                event.preventDefault();
+                event.stopPropagation();
+                const principal =  nestedPrincipal;
+                console.log("princ attained");
+
+                document.getElementById('page1').style.display = 'none';
+                document.getElementById('page2').style.display = 'none';
+                document.getElementById('page3').style.display = 'block';
+
+                try {
+                    const profile   = await actor.logged_pat_check_patRecord(principal);
+                    console.log(profile);
+                    
+                    if (profile !== null) {
+                        
+                        const patName    = (profile.name !== "")           ? profile.name    : "Not Recorded";
+                        const patHN      = (profile.healthcare_num !== 0) ? profile.healthcare_num : 0;
+                        const patDob     = (profile.dob !== null)          ? profile.dob     : "Not Recorded" ;
+                        const patweight  = (profile.weight !== 0)          ? profile.weight  : 0;
+                        const patheight  = (profile.height !== 0)          ? profile.height  : 0;
+                        const patsex     = (profile.sex !== "")            ? profile.sex     : "Not Recorded";
+                        const patgender  = (profile.gender !== "")         ? profile.gender  : "Not Recorded" ;
+                        const pathistory = (profile.history.length > 0)    ? profile.history : ["Not Recorded"] ;
+            
+                        document.getElementById("Name").innerText   = patName;
+                        document.getElementById("HN").innerText     = patHN;
+                        document.getElementById("Dob").innerText    = patDob;
+                        document.getElementById("Weight").innerText = patweight;
+                        document.getElementById("Height").innerText = patheight;
+                        document.getElementById("Sex").innerText    = patsex;
+                        document.getElementById("Gender").innerText = patgender;
+                        // document.getElementById("myHist").innerText   = pathistory;
+                    
+                    } else {
+                        document.getElementById("profileInfoDiv").innerText = "Profile not found.";
+                    }
+                } catch (error) {
+                    console.error("Error fetching profile:", error);
+                    document.getElementById("profileInfoDiv").innerText= "Error fetching profile.";
+                }
+
+                const backButton = document.createElement("button");
+                backButton.textContent = "Back";
+                backButton.addEventListener("click", async function(event) {
+                    console.log("Button pressed");
+                    event.preventDefault();
+                    event.stopPropagation();
+                    console.log("princ attained");
+    
+                    document.getElementById('page1').style.display = 'block';
+                    document.getElementById('page2').style.display = 'none';
+                    document.getElementById('page3').style.display = 'none';
+    
+                    
+                });
+    
+                document.getElementById("goBack").appendChild(backButton);
+            });
 
             const updateButton = document.createElement("button");
             updateButton.textContent = "Update Patient!";
@@ -254,7 +314,7 @@ getPatientListButton.onclick = async (e) => {
             });
 
             
-
+            listItem.appendChild(viewProfileButton);
             listItem.appendChild(updateButton);
             document.getElementById("resultsList").appendChild(listItem);
         }
@@ -276,6 +336,7 @@ switchPageButton.onclick = async (e) => {
     e.preventDefault();
     document.getElementById('page1').style.display = 'none';
     document.getElementById('page2').style.display = 'block';
+    document.getElementById('page3').style.display = 'none';
     console.log("pages should be switched");    
     
     return false;
@@ -286,7 +347,8 @@ switchPageButton1.onclick = async (e) => {
     e.preventDefault();
 
     document.getElementById('page1').style.display = 'block';
-    document.getElementById('page2').style.display = 'none';  
+    document.getElementById('page2').style.display = 'none';
+    document.getElementById('page3').style.display = 'none';  
  
     
     return false;
