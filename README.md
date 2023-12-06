@@ -48,7 +48,7 @@ Follow these steps to get started with MediData:
 - Motoko
 
 ## Team
-- Alden Lien
+- Alden Lien [@aldenlien](https://github.com/aldenlien)
 - Jack Li - [@jackl16](https://github.com/jackl16)
 - Steven Ng - [@SYS-NG](https://github.com/SYS-NG)
 
