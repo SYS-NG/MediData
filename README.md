@@ -1,8 +1,8 @@
 # MediData: Decentralized Medical Data Storage on Internet Computer Blockchain
 
-We are on the chain: https://tb4eb-piaaa-aaaao-a2uzq-cai.icp0.io/
+🌐 **Explore MediData on the Chain:** [MediData on Internet Computer](https://tb4eb-piaaa-aaaao-a2uzq-cai.icp0.io/)
 
-Welcome to MediData, a revolutionary platform developed for the ChainShift Hackathon, leveraging the power of the Internet Computer blockchain to provide a secure and decentralized solution for medical data storage. MediData ensures transparent and efficient tracking, viewing, and modification of patient data while empowering patients with control over doctor access to their information. This Repo is a proof-of-concept used to show potential functionality of MediData.
+🚀 Welcome to MediData, a revolutionary platform developed for the ChainShift Hackathon, leveraging the power of the Internet Computer blockchain to provide a secure and decentralized solution for medical data storage. MediData ensures transparent and efficient tracking, viewing, and modification of patient data while empowering patients with control over doctor access to their information. This Repo is a proof-of-concept used to show the potential functionality of MediData.
 
 To get started, you might want to explore the project directory structure and the default configuration file. Working with this project in your development environment will not affect any production deployment or identity tokens.
 
@@ -49,8 +49,8 @@ Follow these steps to get started with MediData:
 
 ## Team
 - Alden Lien - [@aldenlien](https://github.com/aldenlien)
-- Jack Li - [@jackl16](https://github.com/jackl16)
-- Steven Ng - [@SYS-NG](https://github.com/SYS-NG)
+- Jack Li    - [@jackl16](https://github.com/jackl16)
+- Steven Ng  - [@SYS-NG](https://github.com/SYS-NG)
 
 ## Acknowledgments
 
