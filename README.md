@@ -1,6 +1,7 @@
 # MediData: Decentralized Medical Data Storage on Internet Computer Blockchain
 
-➡️ **Checkout Our Submitted Project Page:** [MediData Demo](https://dorahacks.io/buidl/8135)
+➡️ **Checkout Our Submitted Project:** [MediData Demo](https://dorahacks.io/buidl/8135)
+
 🌐 **Explore MediData on the Chain:** [MediData on Internet Computer](https://tb4eb-piaaa-aaaao-a2uzq-cai.icp0.io/)
 
 🚀 Welcome to MediData, a revolutionary platform developed for the ChainShift Hackathon, leveraging the power of the Internet Computer blockchain to provide a secure and decentralized solution for medical data storage. MediData ensures transparent and efficient tracking, viewing, and modification of patient data while empowering patients with control over doctor access to their information. This Repo is a proof-of-concept used to show the potential functionality of MediData.
